@@ -1,0 +1,29 @@
+- environment
+
+  - user agent playwright, deviceScaleFactor, isMobile, hasTouch, geolocation, locale, language
+  - requires a new context
+
+- plugins
+  - can modify files, requires a dedicated context
+
+import maps
+
+- can modify import paths, imports can bust cache using query params
+
+caching
+
+- shared per browser context
+
+```js
+import { chromeLauncher } from '@web/test-runner';
+
+export default {
+  browsers: [
+    chromeLauncher({
+      async createContext(browser) {
+        const context = await browser.newContext();
+      },
+    }),
+  ],
+};
+```

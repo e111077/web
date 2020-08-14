@@ -1,4 +1,4 @@
-import playwright, { Browser, Page, LaunchOptions } from 'playwright';
+import playwright, { Browser, Page, LaunchOptions, BrowserContext } from 'playwright';
 import { BrowserLauncher, TestRunnerCoreConfig, CoverageMapData } from '@web/test-runner-core';
 import { PlaywrightLauncherPage } from './PlaywrightLauncherPage';
 
@@ -16,6 +16,7 @@ export type CreatePageFunction = (args: {
 export class PlaywrightLauncher implements BrowserLauncher {
   public name: string;
   public type = 'playwright';
+  private context: BrowserContext;
   private config?: TestRunnerCoreConfig;
   private testFiles?: string[];
   private browser?: Browser;
@@ -37,6 +38,7 @@ export class PlaywrightLauncher implements BrowserLauncher {
     this.config = config;
     this.testFiles = testFiles;
     this.browser = await playwright[this.product].launch(this.launchOptions);
+    this.context = await this.browser.newContext();
   }
 
   async stop() {
