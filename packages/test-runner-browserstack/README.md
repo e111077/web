@@ -1,15 +1,13 @@
-# Web Test Runner Browserstack
+# Browserstack
 
-Browser launcher for Web Test Runner using Browserstack.
+Run tests remotely on [Browserstack](https://www.browserstack.com/).
 
-For modern browsers we recommend using other browser launchers, as they are a lot faster. Browserstack can be used to target older browser versions.
-
-See [@web/test-runner](https://github.com/modernweb-dev/web/tree/master/packages/test-runner) for a default implementation and CLI for the test runner.
+For modern browsers, we recommend using other browser launchers, as they are a lot faster. Browserstack is a good option for testing on older browser versions.
 
 ## Usage
 
 ```js
-const { browserstackLauncher } = require('@web/test-runner-browserstack');
+import { browserstackLauncher } from '@web/test-runner-browserstack';
 
 const sharedCapabilities = {
   // it's recommended to store user and key as environment variables
@@ -24,7 +22,7 @@ const sharedCapabilities = {
   build: `build ${process.env.GITHUB_RUN_NUMBER || 'unknown'}`,
 };
 
-module.exports = {
+export default {
   browsers: [
     browserstackLauncher({
       capabilities: {

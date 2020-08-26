@@ -6,13 +6,16 @@ const { resolve } = require('path');
 const { saucelabsLauncher } = require('../dist/saucelabsLauncher');
 
 const sharedCapabilities = {
-  name: 'integration test',
-  build: `modern-web ${process.env.GITHUB_REF ?? 'local'} build ${
-    process.env.GITHUB_RUN_NUMBER ?? ''
-  }`,
+  'sauce:options': {
+    username: process.env.SAUCE_USERNAME,
+    accessKey: process.env.SAUCE_ACCESS_KEY,
+    build: `modern-web ${process.env.GITHUB_REF ?? 'local'} build ${process.env.GITHUB_RUN_NUMBER ??
+      ''}`,
+    name: 'integration test',
+  },
 };
 
-it('runs tests on browserstack', async function () {
+it('runs tests on saucelabs', async function() {
   this.timeout(50000);
 
   await runTests(
@@ -21,28 +24,25 @@ it('runs tests on browserstack', async function () {
         saucelabsLauncher({
           capabilities: {
             ...sharedCapabilities,
-            browserName: 'Chrome',
-            browser_version: 'latest',
-            os: 'windows',
-            os_version: '10',
+            browserName: 'chrome',
+            browserVersion: 'latest',
+            platformName: 'Windows 10',
           },
         }),
         // saucelabsLauncher({
         //   capabilities: {
         //     ...sharedCapabilities,
-        //     browserName: 'Safari',
-        //     browser_version: '11.1',
-        //     os: 'OS X',
-        //     os_version: 'High Sierra',
+        //     browserName: 'safari',
+        //     browserVersion: '11.1',
+        //     platformName: 'macOS 10.13',
         //   },
         // }),
         // saucelabsLauncher({
         //   capabilities: {
         //     ...sharedCapabilities,
-        //     browserName: 'IE',
-        //     browser_version: '11.0',
-        //     os: 'Windows',
-        //     os_version: '7',
+        //     browserName: 'internet explorer',
+        //     browserVersion: '11.0',
+        //     platformName: 'Windows 7',
         //   },
         // }),
       ],

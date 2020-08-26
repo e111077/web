@@ -43,7 +43,7 @@
     "ip": "^1.1.5",
     "saucelabs": "^4.4.4",
     "selenium-webdriver": "^4.0.0-alpha.7",
-    "uuid": "^8.1.0"
+    "uuid": "^8.3.0"
   },
   "devDependencies": {
     "@types/ip": "^1.1.0",

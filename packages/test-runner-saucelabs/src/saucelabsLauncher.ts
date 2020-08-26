@@ -7,19 +7,14 @@ import SaucelabsAPI, {
   SauceConnectInstance,
 } from 'saucelabs';
 import ip from 'ip';
+import { v4 as uuid } from 'uuid';
 
 export interface SaucelabsLauncherArgs {
-  capabilities: Record<string, unknown>;
-  saucelabsOptions: SauceLabsOptions;
+  capabilities: Record<string, any>;
+  saucelabsOptions?: SauceLabsOptions;
   sauceConnectOptions?: SauceConnectOptions;
 }
 
-// const REQUIRED_CAPABILITIES = [
-//   'name',
-//   'sauce:options.username',
-//   'sauce:options.accessKey',
-//   'build',
-// ];
 const localIp = ip.address();
 
 export class SaucelabsLauncher extends SeleniumLauncher {
@@ -28,7 +23,7 @@ export class SaucelabsLauncher extends SeleniumLauncher {
   constructor(
     private capabilities: Capabilities,
     public name: string,
-    private saucelabsOptions: SauceLabsOptions,
+    private saucelabsOptions?: SauceLabsOptions,
     private sauceConnectOptions?: SauceConnectOptions,
   ) {
     super(
@@ -39,7 +34,7 @@ export class SaucelabsLauncher extends SeleniumLauncher {
   }
 
   async start(config: TestRunnerCoreConfig) {
-    const api = new SaucelabsAPI(this.saucelabsOptions);
+    const api = new SaucelabsAPI(this.saucelabsOptions ?? ({} as any));
     this.sauceLabsConnection = await api.startSauceConnect(this.sauceConnectOptions ?? {});
     await super.start(config);
   }
@@ -63,16 +58,24 @@ export function saucelabsLauncher(args: SaucelabsLauncherArgs): BrowserLauncher 
     throw new Error('Missing capabilities in saucelabsLauncher');
   }
 
-  if (!args?.saucelabsOptions) {
-    throw new Error('Missing saucelabsOptions in saucelabsLauncher');
-  }
+  // create tunnel identifier if the user did not create one
+  args.capabilities['sauce:options'] = {
+    tunnelIdentifier:
+      args.capabilities['sauce:options']?.tunnelIdentifier ?? `web-test-runner-${uuid()}`,
+    ...args.capabilities['sauce:options'],
+  };
 
-  // TODO
-  // for (const capability of REQUIRED_CAPABILITIES) {
-  //   if (!args.capabilities[capability]) {
-  //     throw new Error(`Missing capability: ${capability} in browserstack launcher config.`);
-  //   }
-  // }
+  // sync tunnel identifier from capabilities with sauce connect
+  args.sauceConnectOptions = {
+    ...args.sauceConnectOptions,
+    tunnelIdentifier: args.capabilities['sauce:options'].tunnelIdentifier,
+  };
+
+  args.saucelabsOptions = {
+    ...args.saucelabsOptions,
+    user: args.capabilities['sauce:options'].username,
+    key: args.capabilities['sauce:options'].accessKey,
+  };
 
   const caps = args.capabilities;
   const browserName =
@@ -82,7 +85,6 @@ export function saucelabsLauncher(args: SaucelabsLauncherArgs): BrowserLauncher 
 
   const capabilitiesMap = new Map(Object.entries(args.capabilities));
   const capabilities = new Capabilities(capabilitiesMap);
-  capabilities.set('timeout', 300);
 
   return new SaucelabsLauncher(
     capabilities,
